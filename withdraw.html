@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Withdraw</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #f5f5f5; padding-bottom: 20px; }
+  .header { background: linear-gradient(135deg, #ff6a6a, #ff9a9a); padding: 20px; color: #fff; display: flex; align-items: center; font-size: 18px; font-weight: bold; }
+  .back-btn { margin-right: 15px; cursor: pointer; font-size: 20px; }
+  .balance-card { background: #fff; margin: 15px; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .balance-title { font-size: 14px; color: #666; }
+  .balance-amount { font-size: 28px; font-weight: bold; color: #333; margin-top: 5px; }
+  
+  .tabs { display: flex; background: #fff; padding: 5px; margin: 15px; border-radius: 10px; gap: 5px; }
+  .tab { flex: 1; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; background: #fff; color: #666; transition: 0.3s; }
+  .tab.active { background: #ff6a6a; color: #fff; box-shadow: 0 2px 5px rgba(255, 106, 106, 0.3); }
+
+  .content-box { background: #fff; margin: 15px; padding: 20px; border-radius: 15px; }
+  .input-group { margin-bottom: 15px; }
+  .input-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; font-weight: 500; }
+  .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 14px; }
+  .input-group input:focus { border-color: #ff6a6a; }
+  
+  .otp-group { display: flex; gap: 10px; }
+  .otp-btn { padding: 0 15px; background: #333; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; white-space: nowrap; }
+  
+  .action-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #ff6a6a, #ff9a9a); color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(255, 106, 106, 0.3); }
+  .action-btn:active { transform: scale(0.98); }
+
+  .saved-card { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #eee; position: relative; }
+  .saved-card h4 { margin-bottom: 5px; color: #333; font-size: 16px; }
+  .saved-card p { font-size: 13px; color: #666; margin-bottom: 2px; }
+  .edit-icon { position: absolute; top: 15px; right: 15px; color: #ff6a6a; cursor: pointer; font-size: 12px; font-weight: bold; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <span class="back-btn" onclick="window.history.back()">←</span>
+    <span>Withdraw</span>
+  </div>
+
+  <div class="balance-card">
+    <div class="balance-title">Available Balance</div>
+    <div class="balance-amount">₹<span id="currentBalance">0.00</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('upi')">UPI</div>
+    <div class="tab" onclick="switchTab('bank')">Bank Card</div>
+    <div class="tab" onclick="switchTab('usdt')">USDT</div>
+  </div>
+
+  <div class="content-box" id="mainContent">
+    <!-- Content injected by JS -->
+  </div>
+
+  <script>
+    let currentTab = 'upi';
+    let wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 1000;
+    document.getElementById('currentBalance').innerText = wallet;
+
+    // Load saved methods
+    let savedMethods = JSON.parse(localStorage.getItem('winmore_withdraw_methods') || '{}');
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById('mainContent');
+      const methodData = savedMethods[currentTab];
+
+      if (methodData) {
+        // Show Withdraw Form
+        let detailsHtml = '';
+        if(currentTab === 'upi') detailsHtml = `<p>Name: ${methodData.name}</p><p>UPI ID: ${methodData.upi}</p>`;
+        if(currentTab === 'bank') detailsHtml = `<p>Bank: ${methodData.bankName}</p><p>Acc No: ${methodData.accNo}</p><p>IFSC: ${methodData.ifsc}</p>`;
+        if(currentTab === 'usdt') detailsHtml = `<p>Address: ${methodData.address}</p>`;
+
+        container.innerHTML = `
+          <div class="saved-card">
+            <h4>Saved ${currentTab.toUpperCase()} Details</h4>
+            ${detailsHtml}
+            <span class="edit-icon" onclick="clearMethod('${currentTab}')">EDIT</span>
+          </div>
+          <div class="input-group">
+            <label>Withdraw Amount</label>
+            <input type="number" id="withdrawAmount" placeholder="₹110 - ₹50,000">
+          </div>
+          <div class="input-group">
+            <label>Login Password</label>
+            <input type="password" id="withdrawPassword" placeholder="Enter password">
+          </div>
+          <button class="action-btn" onclick="processWithdraw()">Withdraw</button>
+        `;
+      } else {
+        // Show Add Details Form
+        let fieldsHtml = '';
+        if(currentTab === 'upi') {
+          fieldsHtml = `
+            <div class="input-group"><label>Actual Name</label><input type="text" id="addName" placeholder="Enter name"></div>
+            <div class="input-group"><label>UPI ID</label><input type="text" id="addUpi" placeholder="example@upi"></div>
+          `;
+        } else if(currentTab === 'bank') {
+          fieldsHtml = `
+            <div class="input-group"><label>Bank Name</label><input type="text" id="addBankName" placeholder="Enter bank name"></div>
+            <div class="input-group"><label>Account Number</label><input type="number" id="addAccNo" placeholder="Enter account number"></div>
+            <div class="input-group"><label>IFSC Code</label><input type="text" id="addIfsc" placeholder="Enter IFSC code"></div>
+          `;
+        } else if(currentTab === 'usdt') {
+          fieldsHtml = `
+            <div class="input-group"><label>Wallet Address (TRC20)</label><input type="text" id="addAddress" placeholder="Enter wallet address"></div>
+          `;
+        }
+
+        container.innerHTML = `
+          <h3>Add ${currentTab.toUpperCase()} Details</h3>
+          <br>
+          ${fieldsHtml}
+          <div class="input-group">
+            <label>Phone OTP</label>
+            <div class="otp-group">
+              <input type="text" id="otpInput" placeholder="Enter OTP">
+              <button class="otp-btn" onclick="sendOtp()">Send OTP</button>
+            </div>
+          </div>
+          <button class="action-btn" onclick="saveDetails()">Add & Save</button>
+        `;
+      }
+    }
+
+    function sendOtp() {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      alert(`Your OTP is: ${otp}`);
+      localStorage.setItem('temp_otp', otp);
+    }
+
+    function saveDetails() {
+      const enteredOtp = document.getElementById('otpInput').value;
+      const sentOtp = localStorage.getItem('temp_otp');
+
+      if(enteredOtp !== sentOtp) {
+        alert('Invalid OTP');
+        return;
+      }
+
+      let data = {};
+      if(currentTab === 'upi') {
+        data = { name: document.getElementById('addName').value, upi: document.getElementById('addUpi').value };
+        if(!data.name || !data.upi) return alert('Fill all fields');
+      } else if(currentTab === 'bank') {
+        data = { bankName: document.getElementById('addBankName').value, accNo: document.getElementById('addAccNo').value, ifsc: document.getElementById('addIfsc').value };
+        if(!data.bankName || !data.accNo || !data.ifsc) return alert('Fill all fields');
+      } else if(currentTab === 'usdt') {
+        data = { address: document.getElementById('addAddress').value };
+        if(!data.address) return alert('Fill all fields');
+      }
+
+      savedMethods[currentTab] = data;
+      localStorage.setItem('winmore_withdraw_methods', JSON.stringify(savedMethods));
+      localStorage.removeItem('temp_otp');
+      alert('Details saved successfully!');
+      renderContent();
+    }
+
+    function clearMethod(tab) {
+      if(confirm('Are you sure you want to change these details?')) {
+        delete savedMethods[tab];
+        localStorage.setItem('winmore_withdraw_methods', JSON.stringify(savedMethods));
+        renderContent();
+      }
+    }
+
+    function processWithdraw() {
+      const amt = parseFloat(document.getElementById('withdrawAmount').value);
+      const pwd = document.getElementById('withdrawPassword').value;
+
+      if(!amt) return alert('Enter valid amount');
+      if(amt < 110) return alert('Minimum withdrawal amount is ₹110');
+      if(amt > 50000) return alert('Maximum withdrawal amount is ₹50,000');
+      if(!pwd) return alert('Enter password');
+      if(amt > wallet) return alert('Insufficient balance');
+
+      // Simulate processing
+      wallet -= amt;
+      localStorage.setItem('winmore_wallet', wallet);
+      document.getElementById('currentBalance').innerText = wallet;
+
+      // Log Transaction
+      let txs = JSON.parse(localStorage.getItem('winmore_transactions') || '[]');
+      txs.unshift({ id: Date.now(), type: "Withdraw", amount: -amt, status: "Pending", desc: `${currentTab.toUpperCase()} Withdraw`, date: new Date().toLocaleString() });
+      localStorage.setItem('winmore_transactions', JSON.stringify(txs));
+
+      alert('Withdrawal request submitted!');
+      window.history.back();
+    }
+
+    // Initial Render
+    renderContent();
+  </script>
+</body>
+</html>

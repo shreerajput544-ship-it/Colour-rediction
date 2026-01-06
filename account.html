@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Account Page</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+  background:#f5f5f5;
+  padding-bottom: 80px; /* Space for bottom nav */
+}
+
+/* ===== Header ===== */
+.header{
+  background:linear-gradient(135deg,#ff6a6a,#ff9a9a);
+  padding:20px;
+  color:#fff;
+  border-bottom-left-radius:20px;
+  border-bottom-right-radius:20px;
+}
+
+.profile{
+  display:flex;
+  align-items:center;
+}
+
+.profile img{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  margin-right:15px;
+  background:#fff;
+}
+
+.profile-info h2{
+  font-size:18px;
+}
+
+.profile-info .uid{
+  font-size:13px;
+  opacity:0.9;
+}
+
+.profile-info .last-login{
+  font-size:11px;
+  opacity:0.8;
+}
+
+/* ===== Balance Card ===== */
+.balance-card{
+  background:#fff;
+  margin:15px;
+  border-radius:15px;
+  padding:15px;
+}
+
+.balance{
+  font-size:22px;
+  font-weight:bold;
+}
+
+.balance-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reload-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ===== Small Buttons ===== */
+.small-buttons{
+  display:flex;
+  justify-content:space-between;
+  margin-top:15px;
+}
+
+.small-btn{
+  width:30%;
+  background:#f6f6f6;
+  padding:10px 0;
+  text-align:center;
+  border-radius:10px;
+  font-size:14px;
+  border:none;
+  cursor:pointer;
+}
+
+/* ===== Big Cards ===== */
+.big-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin:15px;
+}
+
+.big-btn{
+  background:#fff;
+  padding:15px;
+  border-radius:15px;
+  font-size:15px;
+  font-weight:500;
+}
+
+/* ===== List Buttons ===== */
+.list{
+  background:#fff;
+  margin:15px;
+  border-radius:15px;
+}
+
+.list-item{
+  padding:15px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  justify-content:space-between;
+  font-size:15px;
+}
+
+.list-item:last-child{
+  border-bottom:none;
+}
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  z-index: 1000;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: #888;
+  cursor: pointer;
+}
+.nav-item span:first-child { font-size: 22px; margin-bottom: 2px; }
+.nav-item.active { color: #ff6a6a; font-weight: bold; }
+
+/* ===== POPUP STYLES ===== */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.popup-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 400px;
+}
+#gameHistoryList { max-height: 300px; overflow-y: auto; margin-top: 10px; }
+.uh-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+.win { color: #2ecc71; font-weight: bold; }
+.lose { color: #e74c3c; font-weight: bold; }
+.pending { color: #f39c12; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="profile">
+    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User">
+    <div class="profile-info">
+      <h2 id="userPhone">Guest</h2>
+      <div class="uid">UID: <span id="userUid">Loading...</span></div>
+      <div class="last-login" id="lastLogin">Last login: --</div>
+    </div>
+  </div>
+</div>
+
+<!-- BALANCE -->
+<div class="balance-card">
+  <div class="balance-header">
+    <div class="balance">₹<span id="displayBalance">0.00</span></div>
+    <button class="reload-btn" onclick="window.location.reload()">↻</button>
+  </div>
+
+  <div class="small-buttons">
+    <button class="small-btn" onclick="window.location.href='deposit.html'">Deposit</button>
+    <button class="small-btn" onclick="window.location.href='withdraw.html'">Withdraw</button>
+    <button class="small-btn" onclick="window.location.href='vip.html'">VIP</button>
+  </div>
+</div>
+
+<!-- BIG BUTTONS -->
+<div class="big-buttons">
+  <div class="big-btn" onclick="openGameHistory()">Game History</div>
+  <div class="big-btn" onclick="window.location.href='transaction_history.html'">Transaction</div>
+  <div class="big-btn" onclick="window.location.href='transaction_history.html?filter=Deposit'">My Deposit</div>
+  <div class="big-btn" onclick="window.location.href='transaction_history.html?filter=Withdraw'">My Withdraw</div>
+</div>
+
+<!-- LIST -->
+<div class="list">
+  <div class="list-item">
+    <span>Notification</span>
+    <span>›</span>
+  </div>
+  <div class="list-item">
+    <span>Gifts</span>
+    <span>›</span>
+  </div>
+  <div class="list-item">
+    <span>Game statistics</span>
+    <span>›</span>
+  </div>
+  <div class="list-item">
+    <span>Language</span>
+    <span>English</span>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item" onclick="window.location.href='home.html'">
+    <span>🏠</span>
+    <span>Home</span>
+  </div>
+  <div class="nav-item" onclick="window.location.href='activity.html'">
+    <span>📅</span>
+    <span>Activity</span>
+  </div>
+  <div class="nav-item">
+    <span>💎</span>
+    <span>Promotion</span>
+  </div>
+  <div class="nav-item active">
+    <span>👤</span>
+    <span>Account</span>
+  </div>
+</div>
+
+<!-- GAME HISTORY POPUP -->
+<div class="popup" id="gameHistoryPopup">
+  <div class="popup-content">
+    <h3>Game History</h3>
+    <div id="gameHistoryList"></div>
+    <button onclick="document.getElementById('gameHistoryPopup').style.display='none'" style="margin-top:10px; width:100%; padding:10px; border:none; background:#333; color:#fff; border-radius:10px;">Close</button>
+  </div>
+</div>
+
+<script>
+  // Check Login
+  const userStr = localStorage.getItem("user");
+  if(!userStr){
+    window.location.href="index.html";
+  } else {
+    const user = JSON.parse(userStr);
+    // Display Phone
+    document.getElementById("userPhone").innerText = "+91 " + user.phone;
+    // Generate fake UID based on phone
+    document.getElementById("userUid").innerText = user.phone.substring(0, 7);
+    // Set Date
+    const d = new Date();
+    document.getElementById("lastLogin").innerText = "Last login: " + d.toISOString().split('T')[0] + " " + d.toTimeString().split(' ')[0].substring(0,5);
+    
+    // Set Balance
+    const wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 1000;
+    document.getElementById("displayBalance").innerText = wallet;
+  }
+
+  // Open Game History Popup
+  function openGameHistory() {
+    const list = document.getElementById("gameHistoryList");
+    list.innerHTML = "";
+    const history = JSON.parse(localStorage.getItem('winmore_game_history') || '[]');
+
+    if(history.length === 0) {
+      list.innerHTML = "<p style='text-align:center; padding:10px;'>No bets yet.</p>";
+    }
+
+    history.forEach(item => {
+      let colorClass = item.status === "Win" ? "win" : (item.status === "Lose" ? "lose" : "pending");
+      let sign = item.amount > 0 ? "+" : "";
+      list.innerHTML += `<div class="uh-row"><span>${item.period}</span> <span>${item.selection}</span> <span class="${colorClass}">${item.status}</span> <span class="${colorClass}">${sign}₹${Math.abs(item.amount)}</span></div>`;
+    });
+    document.getElementById("gameHistoryPopup").style.display = "flex";
+  }
+</script>
+
+</body>
+</html>
