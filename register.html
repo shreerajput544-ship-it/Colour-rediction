@@ -5,10 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Win More - Register</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .login-container {
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #333;
+      cursor: pointer;
+      z-index: 10;
+      line-height: 1;
+    }
+  </style>
 </head>
 <body>
 
 <div class="login-container" role="main">
+  <button class="close-btn" onclick="window.location.href='index.html'" aria-label="Close">&times;</button>
   <div class="header">
     <div class="logo" aria-hidden="true">WM</div>
     <h1>WIN MORE</h1>
@@ -83,8 +101,3 @@
 <script src="register.js"></script>
 </body>
 </html>
-
-
-
-
-
