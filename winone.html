@@ -625,7 +625,7 @@
             if (!amt || (!selectedNumber && !selectedColor && !selectedSize)) return alert("Select bet");
             if (amt > wallet) return alert("Low balance");
             wallet -= amt; walletEl.innerText = wallet; localStorage.setItem('winmore_wallet', wallet);
-            logEl.innerText = "Last Bet Amount ₹" + amt;
+            logEl.innerText = "Last Amount ₹" + amt;
             
             let selection = "";
             if(betType === "number") selection = selectedNumber;
