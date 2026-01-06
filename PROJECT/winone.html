@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Win More - Win 1 Min</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial
+        }
+
+        body {
+            background: #f4f4f4
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(45deg, #ff6a6a, #ff8c8c);
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* WALLET */
+        .wallet-card {
+            background: #fff;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .wallet-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px
+        }
+
+        .wallet-btns button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            color: #fff
+        }
+
+        .withdraw {
+            background: #ff6a6a
+        }
+
+        .deposit {
+            background: #2ecc71
+        }
+
+        /* TIMER */
+        .timer-box {
+            background: linear-gradient(45deg, #ff6a6a, #ff8c8c);
+            margin: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .timer-box h2 {
+            font-size: 28px
+        }
+
+        /* RESULT */
+        .result-box {
+            background: #fff;
+            margin: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .result-number {
+            font-size: 40px
+        }
+
+        /* COLORS */
+        .green {
+            color: #2ecc71
+        }
+
+        .red {
+            color: #e74c3c
+        }
+
+        .violet {
+            color: #9b59b6
+        }
+
+        /* BALLS */
+        .numbers {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .ball {
+            height: 55px;
+            width: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            margin: auto;
+            cursor: pointer;
+        }
+
+        .bg-green {
+            background: #2ecc71
+        }
+
+        .bg-red {
+            background: #e74c3c
+        }
+
+        .bg-violet {
+            background: #9b59b6
+        }
+
+        .selected {
+            outline: 4px solid #000
+        }
+
+        /* SIZE BET (BIG/SMALL) */
+        .size-bet {
+            display: flex;
+            gap: 15px;
+            margin: 15px;
+        }
+        .size-bet button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-big { background: #ffa502; }
+        .btn-small { background: #1e90ff; }
+
+        /* LOCKED STATE */
+        .locked {
+            opacity: 0.6;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
+
+        /* COLOR BET */
+        .color-bet {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px;
+        }
+
+        .color-bet button {
+            width: 30%;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        /* BET */
+        .bet-box {
+            background: #fff;
+            margin: 15px;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .bet-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .bet-box button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            background: #2ecc71;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .my-history-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            background: #3498db;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .log {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px
+        }
+
+        /* HISTORY (NEW STYLE ONLY) */
+        .history {
+            background: #fff;
+            margin: 15px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .history-head {
+            background: #ff6a6a;
+            color: #fff;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 12px;
+            font-weight: 100;
+        }
+
+        /* HISTORY TABS */
+        .history-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .history-tabs button {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: none;
+            background: #f5f5f5;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .history-tabs button.active {
+            background: #ff6a6a;
+            color: #fff;
+        }
+
+        /* TREND CHART SCROLL */
+        .chart-container {
+            overflow-x: auto; /* Horizontal Scroll */
+            padding: 10px;
+            display: none; /* Hidden by default */
+        }
+
+        #historyList {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .h-number {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .dot.red {
+            background: #e74c3c
+        }
+
+        .dot.green {
+            background: #2ecc71
+        }
+
+        .dot.violet {
+            background: #9b59b6
+        }
+
+        /* POPUP */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+        }
+
+        .popup-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0
+        }
+
+        /* USER HISTORY POPUP LIST */
+        #userHistoryList {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .uh-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .win { color: #2ecc71; font-weight: bold; }
+        .lose { color: #e74c3c; font-weight: bold; }
+        .pending { color: #f39c12; font-weight: bold; }
+
+        /* BETTING POPUP SPECIFIC */
+        .bet-header {
+            text-align: center;
+            padding: 10px;
+            background: #ff6a6a;
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .bet-presets { display: flex; gap: 5px; margin-bottom: 15px; }
+        .bet-presets button { flex: 1; padding: 8px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 5px; cursor: pointer; }
+        .bet-presets button.active { background: #ff6a6a; color: #fff; border-color: #ff6a6a; }
+        .bet-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .bet-input-group button { width: 40px; height: 40px; border: none; background: #eee; border-radius: 5px; font-size: 20px; cursor: pointer; }
+        .bet-input-group input { text-align: center; font-size: 18px; font-weight: bold; }
+        .bet-actions { display: flex; gap: 10px; }
+        .bet-actions button { flex: 1; padding: 12px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #eee; color: #333; }
+        .btn-confirm { background: linear-gradient(135deg, #ff6a6a, #ff9a9a); color: #fff; }
+
+        /* RESULT POPUP ANIMATION */
+        .result-popup {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .result-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .result-title { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 15px; }
+        .result-ball-large {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result-info { font-size: 18px; font-weight: 500; margin-bottom: 20px; }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <span onclick="window.location.href='home.html'" style="cursor:pointer;">←</span>
+        <h3>Win 1 Min</h3><span>🎧</span>
+    </div>
+
+    <div class="wallet-card">
+        <h1>₹ <span id="wallet">1000</span></h1>
+        <p>Wallet Balance</p>
+        <div class="wallet-btns">
+            <button class="withdraw" onclick="window.location.href='withdraw.html'">Withdraw</button>
+            <button class="deposit" onclick="window.location.href='deposit.html'">Deposit</button>
+        </div>
+    </div>
+
+    <div class="timer-box">
+        <span>Time remaining</span>
+        <h2 id="timer">01 : 00</h2>
+    </div>
+
+    <div class="size-bet" id="sizeBetRow">
+        <button class="btn-big" onclick="selectSize('Big')">Big</button>
+        <button class="btn-small" onclick="selectSize('Small')">Small</button>
+    </div>
+
+    <div class="color-bet" id="colorBetRow">
+        <button class="bg-green" onclick="selectColor('Green')">Green</button>
+        <button class="bg-violet" onclick="selectColor('Violet')">Violet</button>
+        <button class="bg-red" onclick="selectColor('Red')">Red</button>
+    </div>
+
+    <div class="numbers" id="numberBetRow">
+        <div class="ball bg-violet" data-num="0">0</div>
+        <div class="ball bg-green" data-num="1">1</div>
+        <div class="ball bg-red" data-num="2">2</div>
+        <div class="ball bg-green" data-num="3">3</div>
+        <div class="ball bg-red" data-num="4">4</div>
+        <div class="ball bg-violet" data-num="5">5</div>
+        <div class="ball bg-red" data-num="6">6</div>
+        <div class="ball bg-green" data-num="7">7</div>
+        <div class="ball bg-red" data-num="8">8</div>
+        <div class="ball bg-green" data-num="9">9</div>
+    </div>
+
+    <div class="bet-box">
+        <div id="initialBetView">
+            <button class="my-history-btn" onclick="openUserHistory()">My History</button>
+        </div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <!-- HISTORY & TREND SECTION -->
+    <div class="history">
+        <div class="history-tabs">
+            <button id="tabHistory" class="active" onclick="switchTab('history')">History</button>
+            <button id="tabTrend" onclick="switchTab('trend')">Trend Chart</button>
+        </div>
+
+        <!-- History Table View -->
+        <div id="historyView">
+            <div class="history-head">
+                <span>Period</span>
+                <span>Number</span>
+                <span>Big Small</span>
+                <span>Color</span>
+            </div>
+            <div id="historyList"></div>
+        </div>
+
+        <!-- Trend Chart View -->
+        <div id="trendView" class="chart-container">
+            <canvas id="trendChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- BETTING POPUP -->
+    <div class="popup" id="bettingPopup">
+        <div class="popup-content">
+            <div class="bet-header">
+                <h3 id="bettingTitle">Select</h3>
+            </div>
+            <div class="bet-presets">
+                <button onclick="setBetAmount(10)">10</button>
+                <button onclick="setBetAmount(100)">100</button>
+                <button onclick="setBetAmount(1000)">1000</button>
+                <button onclick="setBetAmount(10000)">10K</button>
+            </div>
+            <div class="bet-input-group">
+                <button onclick="adjustBetAmount(-10)">-</button>
+                <input type="number" id="bettingAmount" value="10">
+                <button onclick="adjustBetAmount(10)">+</button>
+            </div>
+            <div class="bet-actions">
+                <button class="btn-cancel" onclick="closeBettingPopup()">Cancel</button>
+                <button class="btn-confirm" onclick="placeBet()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <h3 id="popupTitle"></h3>
+            <input type="number" id="popupAmount" placeholder="Enter amount">
+            <button onclick="submitPopup()">Submit</button>
+        </div>
+    </div>
+
+    <div class="popup" id="userHistoryPopup">
+        <div class="popup-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3>My Bet History</h3>
+                <span style="font-weight:bold; color:#ff6a6a;">₹<span id="popupWallet"></span></span>
+            </div>
+            <div id="userHistoryList"></div>
+            <button onclick="document.getElementById('userHistoryPopup').style.display='none'" style="margin-top:10px; width:100%; padding:10px; border:none; background:#333; color:#fff; border-radius:10px;">Close</button>
+        </div>
+    </div>
+
+    <!-- RESULT REVEAL POPUP -->
+    <div id="resultPopup" class="result-popup">
+        <div class="result-content">
+            <div class="result-title">Period: <span id="resPeriod"></span></div>
+            <div id="resBall" class="result-ball-large">?</div>
+            <div id="resText" class="result-info">Waiting...</div>
+            <button onclick="document.getElementById('resultPopup').style.display='none'" style="padding:10px 30px; border:none; background:#333; color:#fff; border-radius:20px; cursor:pointer;">Close</button>
+        </div>
+    </div>
+    <!-- Sound Effect (Win Chime) -->
+    <audio id="resultAudio" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+
+    <script>
+        /* ===== 60 SECOND TIMER LOGIC ===== */
+        let wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 1000;
+        let selectedNumber = null, selectedColor = null, selectedSize = null;
+        let betType = "";
+        let currentBets = []; // Support multiple bets
+        let history = [];
+        let userHistory = JSON.parse(localStorage.getItem('winmore_game_history') || '[]');
+        let periodId = "";
+        let time = 0;
+
+        const walletEl = document.getElementById("wallet");
+        const logEl = document.getElementById("log");
+        walletEl.innerText = wallet; // Set initial wallet text
+
+        document.querySelectorAll(".ball").forEach(b => {
+            b.onclick = () => {
+                clearSelection();
+                b.classList.add("selected");
+                selectedNumber = b.dataset.num;
+                betType = "number";
+                openBettingPopup("Select Number " + selectedNumber, "number");
+            }
+        });
+
+        function selectColor(c) {
+            clearSelection();
+            selectedColor = c;
+            betType = "color";
+            openBettingPopup("Join " + c, "color");
+        }
+
+        function selectSize(s) {
+            clearSelection();
+            selectedSize = s;
+            betType = "size";
+            openBettingPopup("Select " + s, "size");
+        }
+
+        function openBettingPopup(title, type) {
+            document.getElementById("bettingTitle").innerText = title;
+            document.getElementById("bettingPopup").style.display = "flex";
+            document.getElementById("bettingAmount").value = 10; // Default
+            
+            // Color header based on type
+            const header = document.querySelector('.bet-header');
+            if(type === 'color') {
+                if(selectedColor === 'Green') header.style.background = '#2ecc71';
+                else if(selectedColor === 'Red') header.style.background = '#e74c3c';
+                else if(selectedColor === 'Violet') header.style.background = '#9b59b6';
+            } else {
+                header.style.background = '#ff6a6a';
+            }
+        }
+
+        function closeBettingPopup() {
+            clearSelection();
+            document.getElementById("bettingPopup").style.display = "none";
+        }
+
+        function setBetAmount(amt) {
+            document.getElementById("bettingAmount").value = amt;
+        }
+
+        function adjustBetAmount(delta) {
+            let input = document.getElementById("bettingAmount");
+            let val = parseInt(input.value) || 0;
+            if(val + delta >= 10) input.value = val + delta;
+        }
+
+        function clearSelection() {
+            document.querySelectorAll(".ball").forEach(b => b.classList.remove("selected"));
+            selectedNumber = null; selectedColor = null; selectedSize = null;
+        }
+
+        function getColor(n) {
+            if (n == 0 || n == 5) return "Violet";
+            if (n % 2 == 0) return "Red";
+            return "Green";
+        }
+
+        function placeBet() {
+            if (time <= 5) return alert("Betting is locked!");
+            let amt = +document.getElementById("bettingAmount").value;
+            if (!amt || (!selectedNumber && !selectedColor && !selectedSize)) return alert("Select bet");
+            if (amt > wallet) return alert("Low balance");
+            wallet -= amt; walletEl.innerText = wallet; localStorage.setItem('winmore_wallet', wallet);
+            logEl.innerText = "Bet placed ₹" + amt;
+            
+            let selection = "";
+            if(betType === "number") selection = selectedNumber;
+            else if(betType === "color") selection = selectedColor;
+            else if(betType === "size") selection = selectedSize;
+
+            let betId = Date.now() + Math.random(); // Unique ID
+            let newBet = { id: betId, periodId: periodId, amount: amt, type: betType, selection: selection };
+            currentBets.push(newBet);
+            
+            // Note: We don't strictly need to save 'currentBets' to LS anymore for recovery, 
+            // because we save the full history as 'Pending'. But we keep it for in-memory state if needed.
+            // Save bets to localStorage
+            localStorage.setItem('winmore_current_bets_60', JSON.stringify(currentBets));
+
+            // Add Pending History immediately
+            addToUserHistory(betId, periodId, "Pending", -amt, betType, selection);
+
+            closeBettingPopup(); // Hide popup after placing
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                const info = getPeriodInfo();
+                const newPeriodId = info.periodId;
+                time = info.remaining;
+                
+                // Display Logic for 60s (01:00 format)
+                let min = Math.floor(time / 60);
+                let sec = time % 60;
+                document.getElementById("timer").innerText = `0${min} : ${sec < 10 ? "0" + sec : sec}`;
+                
+                // Lock Logic (Last 5 seconds)
+                if (time <= 5) {
+                    document.getElementById("sizeBetRow").classList.add("locked");
+                    document.getElementById("colorBetRow").classList.add("locked");
+                    document.getElementById("numberBetRow").classList.add("locked");
+                    document.getElementById("placeBetBtn").classList.add("locked");
+                    document.getElementById("placeBetBtn").innerText = "Locked";
+                } else {
+                    document.getElementById("sizeBetRow").classList.remove("locked");
+                    document.getElementById("colorBetRow").classList.remove("locked");
+                    document.getElementById("numberBetRow").classList.remove("locked");
+                    document.getElementById("placeBetBtn").classList.remove("locked");
+                    document.getElementById("placeBetBtn").innerText = "Place Bet";
+                }
+
+                // Round End / New Period Detected
+                if (periodId !== "" && newPeriodId !== periodId) {
+                    // Update Public History (Trend/List)
+                    addResultToHistory(periodId);
+
+                    // Show Result Popup & Play Sound (Real-time)
+                    let r = generateResult(periodId);
+                    let c = getColor(r);
+                    showResultPopup(periodId, r, c);
+                    currentBets = [];
+                    localStorage.removeItem('winmore_current_bets_60');
+                }
+
+                // Continuous check for any pending bets from past periods (Real-time update)
+                settlePendingBets();
+                
+                // Update current Period ID
+                periodId = newPeriodId;
+                
+            }, 1000);
+        }
+
+        function showResultPopup(pid, num, color) {
+            document.getElementById('resPeriod').innerText = pid;
+            const ball = document.getElementById('resBall');
+            ball.innerText = num;
+            
+            // Set Color
+            if(num === 0 || num === 5) ball.style.background = '#9b59b6'; // Violet
+            else if(color === 'Green') ball.style.background = '#2ecc71';
+            else ball.style.background = '#e74c3c'; // Red
+
+            document.getElementById('resText').innerText = color;
+            document.getElementById('resText').style.color = ball.style.background;
+            
+            document.getElementById('resultPopup').style.display = 'flex';
+            
+            // Play Sound
+            const audio = document.getElementById('resultAudio');
+            if(audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Audio error:", e)); }
+
+            // Auto hide after 4 seconds
+            setTimeout(() => { document.getElementById('resultPopup').style.display = 'none'; }, 4000);
+        }
+
+        /* ===== PUBLIC HISTORY UPDATE ===== */
+        function addResultToHistory(finishedPeriodId) {
+            let r = generateResult(finishedPeriodId);
+            let c = getColor(r);
+            
+            // Prevent Duplicates
+            const entryExists = history.some(h => h.startsWith(finishedPeriodId + " |"));
+            if (!entryExists) {
+                history.unshift(`${finishedPeriodId} | ${r} ${c}`);
+                updateHistory();
+                if(document.getElementById('trendView').style.display === 'block') drawTrendChart();
+            }
+        }
+
+        /* ===== REAL-TIME BET SETTLEMENT ===== */
+        function settlePendingBets() {
+            const info = getPeriodInfo();
+            const currentPeriodId = info.periodId;
+            
+            let savedHistory = JSON.parse(localStorage.getItem('winmore_game_history') || '[]');
+            let walletChanged = false;
+            let historyChanged = false;
+
+            savedHistory.forEach(bet => {
+                // Check if bet is pending and belongs to a past period
+                if (bet.status === "Pending" && bet.period < currentPeriodId && bet.game === 'Win 1 Min') {
+                    
+                    // Generate result for that specific past period
+                    let r = generateResult(bet.period);
+                    let c = getColor(r);
+                    let resultSize = r >= 5 ? "Big" : "Small";
+                    
+                    let win = false;
+                    if (bet.type == "number" && parseInt(bet.selection) === r) win = true;
+                    if (bet.type == "color" && bet.selection === c) win = true;
+                    if (bet.type == "size" && bet.selection === resultSize) win = true;
+
+                    if (win) {
+                        let betVal = Math.abs(bet.amount);
+                        let winAmount = bet.type == "number" ? betVal * 9 : betVal * 2;
+                        wallet += winAmount;
+                        bet.status = "Win";
+                        bet.amount = winAmount;
+                        walletChanged = true;
+                    } else {
+                        bet.status = "Lose";
+                    }
+                    historyChanged = true;
+                }
+            });
+
+            if (historyChanged) {
+                localStorage.setItem('winmore_game_history', JSON.stringify(savedHistory));
+                userHistory = savedHistory; // Sync in-memory variable
+
+                if (walletChanged) {
+                    walletEl.innerText = wallet;
+                    localStorage.setItem('winmore_wallet', wallet);
+                    if(document.getElementById("popupWallet")) document.getElementById("popupWallet").innerText = wallet;
+                }
+
+                // Refresh Popup if open
+                if(document.getElementById("userHistoryPopup").style.display === "flex") {
+                    renderUserHistoryList();
+                }
+            }
+        }
+
+        /* ===== ONLY HISTORY UI LOGIC ===== */
+        function updateHistory() {
+            const box = document.getElementById("historyList");
+            box.innerHTML = "";
+
+            history.slice(0, 50).forEach(h => {
+                // h = "2024001 | 5 Green"
+                let rawParts = h.split("|");
+                let pid = rawParts[0].trim();
+                let part = rawParts[1].trim().split(" ");
+                let num = parseInt(part[0]);
+                let color = part[1];
+                let size = num >= 5 ? "Big" : "Small";
+
+                let dots = "";
+                if (num === 0 || num === 5) {
+                    dots = '<span class="dot green"></span><span class="dot violet"></span>';
+                } else if (color === "Red") {
+                    dots = '<span class="dot red"></span>';
+                } else {
+                    dots = '<span class="dot green"></span>';
+                }
+
+                let row = document.createElement("div");
+                row.className = "history-row";
+                row.innerHTML = `
+      <span>${pid}</span>
+      <span class="h-number" style="color:${color.toLowerCase()}">${num}</span>
+      <span>${size}</span>
+      <span>${dots}</span>
+    `;
+                box.appendChild(row);
+            });
+        }
+
+        /* TAB SWITCHING */
+        function switchTab(tab) {
+            if (tab === 'history') {
+                document.getElementById('historyView').style.display = 'block';
+                document.getElementById('trendView').style.display = 'none';
+                document.getElementById('tabHistory').classList.add('active');
+                document.getElementById('tabTrend').classList.remove('active');
+            } else {
+                document.getElementById('historyView').style.display = 'none';
+                document.getElementById('trendView').style.display = 'block';
+                document.getElementById('tabHistory').classList.remove('active');
+                document.getElementById('tabTrend').classList.add('active');
+                drawTrendChart();
+            }
+        }
+
+        /* TREND CHART LOGIC */
+        function drawTrendChart() {
+            const canvas = document.getElementById('trendChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            // Dynamic Width for 50 items (30px per item)
+            const itemWidth = 30;
+            const dataCount = 50;
+            canvas.width = Math.max(document.querySelector('.history').offsetWidth, dataCount * itemWidth);
+            
+            const width = canvas.width; 
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Get last 50 results, reverse to show oldest to newest
+            const data = history.slice(0, 50).reverse().map(h => {
+                let parts = h.split("|");
+                return parseInt(parts[1].trim().split(" ")[0]);
+            });
+
+            if (data.length === 0) return;
+
+            const stepX = width / dataCount;
+            const padding = 20;
+            const availHeight = height - 2 * padding;
+
+            // Draw Line
+            ctx.beginPath();
+            ctx.strokeStyle = "#ff6a6a";
+            ctx.lineWidth = 2;
+            
+            data.forEach((num, i) => {
+                const x = i * stepX + (stepX / 2);
+                const y = height - padding - (num / 9) * availHeight;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Draw Points
+            data.forEach((num, i) => {
+                const x = i * stepX + (stepX / 2);
+                const y = height - padding - (num / 9) * availHeight;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = "#ff6a6a";
+                ctx.fill();
+                ctx.fillStyle = "#fff";
+                ctx.font = "10px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(num, x, y - 8);
+            });
+        }
+
+        /* TIME & PERIOD LOGIC */
+        function getPeriodInfo() {
+            return getPeriodInfoFromTimestamp(Math.floor(Date.now() / 1000), 60);
+        }
+
+        function getPeriodInfoFromTimestamp(totalSeconds, interval) {
+            const dateObj = new Date(totalSeconds * 1000);
+            
+            // Calculate Period Sequence based on time
+            const startOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime() / 1000;
+            const secondsSinceStart = totalSeconds - startOfDay;
+            const periodSeq = Math.floor(secondsSinceStart / interval) + 1;
+            
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const periodId = `${y}${m}${d}${String(periodSeq).padStart(4, '0')}`;
+            
+            const remaining = interval - (secondsSinceStart % interval);
+            return { periodId, remaining };
+        }
+
+        function generateResult(pid) {
+            // Deterministic result based on Period ID hash
+            let hash = 0;
+            for (let i = 0; i < pid.length; i++) {
+                hash = (hash << 5) - hash + pid.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash) % 10;
+        }
+
+        /* USER HISTORY LOGIC */
+        function addToUserHistory(id, pid, status, amount, type, selection) {
+            // Check if entry exists by unique ID
+            let existing = userHistory.find(u => u.id === id);
+            if (existing) {
+                existing.status = status;
+                existing.amount = amount;
+            } else {
+                // New entry
+                userHistory.unshift({
+                    id: id,
+                    period: pid,
+                    status: status,
+                    amount: amount,
+                    type: type,
+                    selection: selection,
+                    game: 'Win 1 Min' // Tag for filtering
+                });
+                
+                // Log to Transaction History (localStorage)
+                logTransaction(id, "Bet", amount, status, `Period ${pid}: ${type} ${selection}`);
+            }
+            
+            // Save Game History to LocalStorage for Account Page
+            localStorage.setItem('winmore_game_history', JSON.stringify(userHistory));
+        }
+
+        function openUserHistory() {
+            // Ensure everything is settled before showing
+            settlePendingBets();
+            renderUserHistoryList();
+            document.getElementById("userHistoryPopup").style.display = "flex";
+        }
+
+        function renderUserHistoryList() {
+            // Force reload from localStorage to ensure we have the latest status (Win/Lose)
+            userHistory = JSON.parse(localStorage.getItem('winmore_game_history') || '[]');
+
+            // Update Popup Wallet Balance
+            document.getElementById("popupWallet").innerText = wallet;
+
+            const list = document.getElementById("userHistoryList");
+            list.innerHTML = "";
+            
+            if(userHistory.length === 0) {
+                list.innerHTML = "<p style='text-align:center; padding:10px;'>No bets yet.</p>";
+            }
+
+            // Filter only Win 1 Min bets
+            userHistory.filter(item => item.game === 'Win 1 Min').forEach(item => {
+                let colorClass = item.status === "Win" ? "win" : (item.status === "Lose" ? "lose" : "pending");
+                let sign = item.amount > 0 ? "+" : "";
+                list.innerHTML += `<div class="uh-row"><span>${item.period}</span> <span>${item.selection}</span> <span class="${colorClass}">${item.status}</span> <span class="${colorClass}">${sign}₹${Math.abs(item.amount)}</span></div>`;
+            });
+        }
+
+        /* TRANSACTION LOGGING */
+        function logTransaction(id, type, amount, status, desc) {
+            let txs = JSON.parse(localStorage.getItem('winmore_transactions') || '[]');
+            let existing = txs.find(t => t.id === id);
+            
+            if (existing) {
+                existing.status = status;
+                existing.amount = amount;
+            } else {
+                txs.unshift({
+                    id: id,
+                    type: type,
+                    amount: amount,
+                    status: status,
+                    desc: desc,
+                    date: new Date().toLocaleString()
+                });
+            }
+            localStorage.setItem('winmore_transactions', JSON.stringify(txs));
+        }
+
+        /* POPUP */
+        let popupType = "";
+        function openPopup(t) {
+            popupType = t;
+            document.getElementById("popupTitle").innerText = t.toUpperCase();
+            document.getElementById("popup").style.display = "flex";
+        }
+        function submitPopup() {
+            let amt = +document.getElementById("popupAmount").value;
+            if (popupType == "deposit") {
+                wallet += amt;
+                logTransaction(Date.now(), "Deposit", amt, "Success", "Wallet Deposit");
+            }
+            if (popupType == "withdraw" && amt <= wallet) {
+                wallet -= amt;
+                logTransaction(Date.now(), "Withdraw", -amt, "Success", "Wallet Withdraw");
+            }
+            walletEl.innerText = wallet; localStorage.setItem('winmore_wallet', wallet);
+            document.getElementById("popup").style.display = "none";
+        }
+
+        /* INITIALIZATION & CATCH-UP LOGIC */
+        (function init() {
+            const info = getPeriodInfo();
+            periodId = info.periodId;
+            time = info.remaining;
+            
+            // Generate Past History (Last 50 rounds)
+            const now = Math.floor(Date.now() / 1000);
+            const interval = 60;
+            for(let i = 1; i <= 50; i++) {
+                const pInfo = getPeriodInfoFromTimestamp(now - (i * interval), interval);
+                const pid = pInfo.periodId;
+                const r = generateResult(pid);
+                const c = getColor(r);
+                history.push(`${pid} | ${r} ${c}`);
+            }
+            updateHistory();
+            if(document.getElementById('trendView').style.display === 'block') drawTrendChart();
+            
+            // Immediate check for pending bets on load
+            settlePendingBets();
+            
+            startTimer();
+        })();
+    </script>
+
+</body>
+
+</html>
