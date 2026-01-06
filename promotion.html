@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promotion</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #f5f5f5; padding-bottom: 80px; }
+  .header { background: linear-gradient(135deg, #ff6a6a, #ff9a9a); padding: 20px; color: #fff; text-align: center; font-size: 18px; font-weight: bold; }
+  
+  .promo-card { background: #fff; margin: 15px; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .promo-title { font-size: 14px; color: #666; }
+  .promo-amount { font-size: 32px; font-weight: bold; color: #333; margin: 10px 0; }
+  .invite-code { font-size: 24px; letter-spacing: 2px; color: #ff6a6a; font-weight: bold; margin: 10px 0; display: inline-block; }
+  
+  .btn-copy { background: #fff5f5; color: #ff6a6a; border: 1px dashed #ff6a6a; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 13px; width: 100%; word-break: break-all; }
+  .btn-copy:active { transform: scale(0.95); }
+  
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px; }
+  .stat-box { background: #fff; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  .stat-num { font-size: 20px; font-weight: bold; color: #333; }
+  .stat-label { font-size: 12px; color: #888; margin-top: 5px; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; border-top-left-radius: 15px; border-top-right-radius: 15px; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #888; cursor: pointer; }
+  .nav-item span:first-child { font-size: 22px; margin-bottom: 2px; }
+  .nav-item.active { color: #ff6a6a; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="header">Agency Promotion</div>
+
+<div class="promo-card">
+  <div class="promo-title">Total Commission</div>
+  <div class="promo-amount">₹<span id="commBalance">0.00</span></div>
+  <p style="font-size:12px; color:#888;">Yesterday's Commission: ₹0.00</p>
+</div>
+
+<div class="promo-card">
+  <div class="promo-title">My Invite Code</div>
+  <div class="invite-code" id="myCode">------</div>
+  <br>
+  <button class="btn-copy" id="inviteLinkBtn" onclick="copyCode()">Loading Link...</button>
+  <div style="font-size:11px; color:#999; margin-top:5px;">(Tap link to copy)</div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-box">
+    <div class="stat-num" id="directSubs">0</div>
+    <div class="stat-label">Direct Subordinates</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num" id="teamSubs">0</div>
+    <div class="stat-label">Team Subordinates</div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item" onclick="window.location.href='home.html'">
+    <span>🏠</span>
+    <span>Home</span>
+  </div>
+  <div class="nav-item" onclick="window.location.href='activity.html'">
+    <span>📅</span>
+    <span>Activity</span>
+  </div>
+  <div class="nav-item active">
+    <span>💎</span>
+    <span>Promotion</span>
+  </div>
+  <div class="nav-item" onclick="window.location.href='account.html'">
+    <span>👤</span>
+    <span>Account</span>
+  </div>
+</div>
+
+<script>
+  // Mock Data
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  // Generate a random 6-digit code if not already assigned
+  if (!user.inviteCode) {
+    user.inviteCode = Math.floor(100000 + Math.random() * 900000).toString();
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+  const code = user.inviteCode;
+  document.getElementById('myCode').innerText = code;
+  
+  // Load Commission (Mock)
+  let db = JSON.parse(localStorage.getItem('winmore_commissions_db') || '{}');
+  let comm = db[code] || 0;
+  document.getElementById('commBalance').innerText = comm.toFixed(2);
+
+  // Set Link Text
+  const link = window.location.origin + "/register.html?code=" + code;
+  document.getElementById('inviteLinkBtn').innerText = link;
+
+  function copyCode() {
+    navigator.clipboard.writeText(link).then(() => {
+      alert("Link Copied Successfully!");
+    }).catch(err => {
+      // Fallback for some browsers
+      prompt("Copy this link:", link);
+    });
+  }
+</script>
+
+</body>
+</html>

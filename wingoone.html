@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>91 Club - WinGo</title>
+    <title>win more</title>
 
     <style>
         * {
@@ -626,6 +626,15 @@
             if (amt > wallet) return alert("Low balance");
             wallet -= amt; walletEl.innerText = wallet; localStorage.setItem('winmore_wallet', wallet);
             logEl.innerText = "Bet placed ₹" + amt;
+
+            // ===== COMMISSION LOGIC =====
+            let user = JSON.parse(localStorage.getItem('user') || '{}');
+            if(user.referrer) {
+                let comm = amt * 0.02; // 2% Commission
+                let db = JSON.parse(localStorage.getItem('winmore_commissions_db') || '{}');
+                db[user.referrer] = (db[user.referrer] || 0) + comm;
+                localStorage.setItem('winmore_commissions_db', JSON.stringify(db));
+            }
             
             let selection = "";
             if(betType === "number") selection = selectedNumber;

@@ -1,182 +1,104 @@
-// Simulated OTP storage for demo
-let pendingRegistrations = {};
+document.addEventListener('DOMContentLoaded', () => {
+    const sendOtpBtn = document.getElementById('send-otp-btn');
+    const verifyOtpBtn = document.getElementById('verify-otp-btn');
+    const backBtn = document.getElementById('back-btn');
+    
+    // Step 1: Send OTP
+    sendOtpBtn.addEventListener('click', async () => {
+        const phone = document.getElementById('reg-phone').value;
+        const password = document.getElementById('reg-password').value;
+        const confirm = document.getElementById('reg-confirm-password').value;
 
-document.addEventListener('DOMContentLoaded', function () {
-  const sendOtpBtn = document.getElementById('send-otp-btn');
-  const verifyOtpBtn = document.getElementById('verify-otp-btn');
-  const backBtn = document.getElementById('back-btn');
-  const regPhone = document.getElementById('reg-phone');
-  const regPassword = document.getElementById('reg-password');
-  const regConfirmPassword = document.getElementById('reg-confirm-password');
-  const regOtp = document.getElementById('reg-otp');
-  
-  const step1 = document.getElementById('step-1');
-  const step2 = document.getElementById('step-2');
-  const step3 = document.getElementById('step-3');
+        // Basic Validation
+        if (!phone || phone.length < 10) return alert("Please enter a valid phone number");
+        if (password !== confirm) return alert("Passwords do not match");
+        if (password.length < 8) return alert("Password too short");
 
-  const phoneError = document.getElementById('reg-phone-error');
-  const passwordError = document.getElementById('reg-password-error');
-  const confirmError = document.getElementById('reg-confirm-error');
-  const otpError = document.getElementById('reg-otp-error');
+        sendOtpBtn.innerText = "Sending...";
+        sendOtpBtn.disabled = true;
 
-  // Password validation rules
-  const passwordRules = {
-    length: /^.{8,}$/,
-    uppercase: /[A-Z]/,
-    lowercase: /[a-z]/,
-    number: /[0-9]/,
-    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/
-  };
+        try {
+            const response = await fetch('/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone })
+            });
+            const data = await response.json();
 
-  // Real-time password validation display
-  regPassword.addEventListener('input', () => {
-    const pwd = regPassword.value;
-    updatePasswordRule('length', passwordRules.length.test(pwd));
-    updatePasswordRule('uppercase', passwordRules.uppercase.test(pwd));
-    updatePasswordRule('lowercase', passwordRules.lowercase.test(pwd));
-    updatePasswordRule('number', passwordRules.number.test(pwd));
-    updatePasswordRule('special', passwordRules.special.test(pwd));
-  });
+            if (data.success) {
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+                document.getElementById('otp-phone-display').innerText = phone;
+                startTimer();
+            } else {
+                alert("Error: " + data.error);
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.innerText = "Send OTP";
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to connect to server.");
+            sendOtpBtn.disabled = false;
+            sendOtpBtn.innerText = "Send OTP";
+        }
+    });
 
-  function updatePasswordRule(rule, valid) {
-    const elem = document.getElementById('rule-' + rule);
-    if (valid) {
-      elem.textContent = '✓ ' + elem.textContent.substring(2);
-      elem.style.color = 'green';
-    } else {
-      elem.textContent = '✗ ' + elem.textContent.substring(2);
-      elem.style.color = 'red';
-    }
-  }
+    // Step 2: Verify OTP
+    verifyOtpBtn.addEventListener('click', async () => {
+        const phone = document.getElementById('reg-phone').value;
+        const otp = document.getElementById('reg-otp').value;
+        const password = document.getElementById('reg-password').value;
+        const inviteCode = document.getElementById('reg-invite').value;
 
-  function validatePassword(pwd) {
-    return Object.values(passwordRules).every(rule => rule.test(pwd));
-  }
+        try {
+            const response = await fetch('/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, otp })
+            });
+            const data = await response.json();
 
-  // Step 1: Send OTP
-  sendOtpBtn.addEventListener('click', () => {
-    phoneError.textContent = '';
-    passwordError.textContent = '';
-    confirmError.textContent = '';
+            if (data.success) {
+                // OTP Verified. Now Register on Server to save to Excel and send SMS.
+                const regResponse = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, password })
+                });
+                const regData = await regResponse.json();
 
-    const phone = regPhone.value.trim();
-    const password = regPassword.value;
-    const confirmPassword = regConfirmPassword.value;
+                if (regData.success) {
+                    // Save user session locally
+                    localStorage.setItem('user', JSON.stringify({ phone: phone, referrer: inviteCode }));
+                    document.getElementById('step-2').classList.add('hidden');
+                    document.getElementById('step-3').classList.remove('hidden');
+                } else {
+                    alert("Registration Error: " + regData.error);
+                }
+            } else {
+                alert("Invalid OTP. Please try again.");
+            }
+        } catch (error) {
+            alert("Verification failed.");
+        }
+    });
 
-    let valid = true;
-
-    // Phone validation
-    if (!/^\d{10}$/.test(phone)) {
-      phoneError.textContent = 'Enter a valid 10-digit phone number.';
-      valid = false;
-    }
-
-    // Password validation
-    if (!validatePassword(password)) {
-      passwordError.textContent = 'Password must meet all requirements above.';
-      valid = false;
-    }
-
-    // Confirm password match
-    if (password !== confirmPassword) {
-      confirmError.textContent = 'Passwords do not match.';
-      valid = false;
-    }
-
-    if (!valid) return;
-
-    // Generate random 6-digit OTP
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = Date.now() + 20000; // 20 seconds
-    pendingRegistrations[phone] = {
-      phone,
-      password,
-      otp,
-      expiresAt
-    };
-
-    console.log(`✓ OTP sent to +91${phone}: ${otp} (expires in 20 seconds)`);
-    alert(`✓ OTP sent to +91${phone}\n\nOTP: ${otp}\n\n(Valid for 20 seconds only)`);
-
-    // Move to Step 2
-    document.getElementById('otp-phone-display').textContent = `+91${phone}`;
-    step1.classList.add('hidden');
-    step2.classList.remove('hidden');
-
-    // Start OTP timer
-    startOtpTimer();
-  });
-
-  // Step 2: Verify OTP
-  verifyOtpBtn.addEventListener('click', () => {
-    otpError.textContent = '';
-
-    const phone = regPhone.value.trim();
-    const otp = regOtp.value.trim();
-    const reg = pendingRegistrations[phone];
-
-    if (!reg) {
-      otpError.textContent = 'Registration session expired. Start again.';
-      return;
+    // Timer Logic
+    function startTimer() {
+        let time = 20;
+        const timerEl = document.getElementById('timer');
+        const interval = setInterval(() => {
+            time--;
+            timerEl.innerText = time;
+            if (time <= 0) clearInterval(interval);
+        }, 1000);
     }
 
-    if (Date.now() > reg.expiresAt) {
-      otpError.textContent = 'OTP expired. Request a new one.';
-      delete pendingRegistrations[phone];
-      return;
-    }
-
-    if (otp !== reg.otp) {
-      otpError.textContent = 'Incorrect OTP. Try again.';
-      return;
-    }
-
-    // OTP verified - save user and redirect to home
-    saveUser(phone, reg.password);
-    delete pendingRegistrations[phone];
-
-    // mark user as logged in (store phone as identifier)
-    localStorage.setItem('user', JSON.stringify({ phone: phone }));
-
-    // Redirect to home page
-    window.location.href = 'home.html';
-  });
-
-  // Back button
-  backBtn.addEventListener('click', () => {
-    regOtp.value = '';
-    otpError.textContent = '';
-    step2.classList.add('hidden');
-    step1.classList.remove('hidden');
-    clearOtpTimer();
-  });
-
-  // OTP Timer
-  let timerInterval = null;
-  function startOtpTimer() {
-    let remaining = 20;
-    const timerElem = document.getElementById('timer');
-    timerInterval = setInterval(() => {
-      remaining--;
-      timerElem.textContent = remaining;
-      if (remaining <= 0) {
-        clearInterval(timerInterval);
-        otpError.textContent = 'OTP expired. Go back and request a new one.';
-        verifyOtpBtn.disabled = true;
-      }
-    }, 1000);
-  }
-
-  function clearOtpTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    document.getElementById('timer').textContent = '20';
-  }
-
-  // Save user to localStorage (simulated persistent storage)
-  function saveUser(phone, password) {
-    const users = JSON.parse(localStorage.getItem('winmore_users') || '[]');
-    users.push({ phone, password, createdAt: new Date().toISOString() });
-    localStorage.setItem('winmore_users', JSON.stringify(users));
-    console.log('User registered and saved:', phone);
-  }
+    // Back Button
+    backBtn.addEventListener('click', () => {
+        document.getElementById('step-2').classList.add('hidden');
+        document.getElementById('step-1').classList.remove('hidden');
+        sendOtpBtn.disabled = false;
+        sendOtpBtn.innerText = "Send OTP";
+    });
 });
