@@ -209,37 +209,37 @@ body{
   </div>
 
   <div class="small-buttons">
-    <button class="small-btn" onclick="window.location.href='deposit.html'">Deposit</button>
-    <button class="small-btn" onclick="window.location.href='withdraw.html'">Withdraw</button>
-    <button class="small-btn" onclick="window.location.href='vip.html'">VIP</button>
+    <button class="small-btn" onclick="window.location.href='deposit.html'" data-key="deposit">Deposit</button>
+    <button class="small-btn" onclick="window.location.href='withdraw.html'" data-key="withdraw">Withdraw</button>
+    <button class="small-btn" onclick="window.location.href='vip.html'" data-key="vip">VIP</button>
   </div>
 </div>
 
 <!-- BIG BUTTONS -->
 <div class="big-buttons">
-  <div class="big-btn" onclick="openGameHistory()">Game History</div>
-  <div class="big-btn" onclick="window.location.href='transaction_history.html'">Transaction</div>
-  <div class="big-btn" onclick="window.location.href='transaction_history.html?filter=Deposit'">My Deposit</div>
-  <div class="big-btn" onclick="window.location.href='transaction_history.html?filter=Withdraw'">My Withdraw</div>
+  <div class="big-btn" onclick="openGameHistory()" data-key="gameHistory">Game History</div>
+  <div class="big-btn" onclick="window.location.href='transaction_history.html'" data-key="transaction">Transaction</div>
+  <div class="big-btn" onclick="window.location.href='transaction_history.html?filter=Deposit'" data-key="myDeposit">My Deposit</div>
+  <div class="big-btn" onclick="window.location.href='transaction_history.html?filter=Withdraw'" data-key="myWithdraw">My Withdraw</div>
 </div>
 
 <!-- LIST -->
 <div class="list">
   <div class="list-item">
-    <span>Notification</span>
+    <span data-key="notification">Notification</span>
     <span>›</span>
   </div>
   <div class="list-item">
-    <span>Gifts</span>
+    <span data-key="gifts">Gifts</span>
     <span>›</span>
   </div>
   <div class="list-item">
-    <span>Game statistics</span>
+    <span data-key="gameStats">Game statistics</span>
     <span>›</span>
   </div>
-  <div class="list-item">
-    <span>Language</span>
-    <span>English</span>
+  <div class="list-item" onclick="openLanguagePopup()">
+    <span data-key="language">Language</span>
+    <span id="currentLang">English</span>
   </div>
 </div>
 
@@ -247,28 +247,38 @@ body{
 <div class="bottom-nav">
   <div class="nav-item" onclick="window.location.href='home.html'">
     <span>🏠</span>
-    <span>Home</span>
+    <span data-key="home">Home</span>
   </div>
   <div class="nav-item" onclick="window.location.href='activity.html'">
     <span>📅</span>
-    <span>Activity</span>
+    <span data-key="activity">Activity</span>
   </div>
   <div class="nav-item" onclick="window.location.href='promotion.html'">
     <span>💎</span>
-    <span>Promotion</span>
+    <span data-key="promotion">Promotion</span>
   </div>
   <div class="nav-item active">
     <span>👤</span>
-    <span>Account</span>
+    <span data-key="account">Account</span>
   </div>
 </div>
 
 <!-- GAME HISTORY POPUP -->
 <div class="popup" id="gameHistoryPopup">
   <div class="popup-content">
-    <h3>Game History</h3>
+    <h3 data-key="gameHistory">Game History</h3>
     <div id="gameHistoryList"></div>
-    <button onclick="document.getElementById('gameHistoryPopup').style.display='none'" style="margin-top:10px; width:100%; padding:10px; border:none; background:#333; color:#fff; border-radius:10px;">Close</button>
+    <button onclick="document.getElementById('gameHistoryPopup').style.display='none'" style="margin-top:10px; width:100%; padding:10px; border:none; background:#333; color:#fff; border-radius:10px;" data-key="close">Close</button>
+  </div>
+</div>
+
+<!-- LANGUAGE POPUP -->
+<div class="popup" id="languagePopup">
+  <div class="popup-content">
+    <h3 data-key="selectLanguage">Select Language</h3>
+    <div class="list-item" onclick="setLanguage('en')">English</div>
+    <div class="list-item" onclick="setLanguage('hi')">हिंदी (Hindi)</div>
+    <button onclick="document.getElementById('languagePopup').style.display='none'" style="margin-top:10px; width:100%; padding:10px; border:none; background:#333; color:#fff; border-radius:10px;" data-key="close">Close</button>
   </div>
 </div>
 
@@ -309,6 +319,71 @@ body{
     });
     document.getElementById("gameHistoryPopup").style.display = "flex";
   }
+
+  /* LANGUAGE LOGIC */
+  const translations = {
+    en: {
+      deposit: "Deposit",
+      withdraw: "Withdraw",
+      vip: "VIP",
+      gameHistory: "Game History",
+      transaction: "Transaction",
+      myDeposit: "My Deposit",
+      myWithdraw: "My Withdraw",
+      notification: "Notification",
+      gifts: "Gifts",
+      gameStats: "Game statistics",
+      language: "Language",
+      home: "Home",
+      activity: "Activity",
+      promotion: "Promotion",
+      account: "Account",
+      close: "Close",
+      selectLanguage: "Select Language"
+    },
+    hi: {
+      deposit: "जमा करें",
+      withdraw: "निकासी",
+      vip: "वीआईपी",
+      gameHistory: "खेल इतिहास",
+      transaction: "लेन-देन",
+      myDeposit: "मेरी जमा राशि",
+      myWithdraw: "मेरी निकासी",
+      notification: "सूचना",
+      gifts: "उपहार",
+      gameStats: "खेल के आंकड़े",
+      language: "भाषा",
+      home: "होम",
+      activity: "गतिविधि",
+      promotion: "प्रचार",
+      account: "खाता",
+      close: "बंद करें",
+      selectLanguage: "भाषा चुनें"
+    }
+  };
+
+  function openLanguagePopup() {
+    document.getElementById('languagePopup').style.display = 'flex';
+  }
+
+  function setLanguage(lang) {
+    localStorage.setItem('winmore_lang', lang);
+    applyLanguage(lang);
+    document.getElementById('languagePopup').style.display = 'none';
+  }
+
+  function applyLanguage(lang) {
+    const t = translations[lang];
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const key = el.getAttribute('data-key');
+      if(t[key]) el.innerText = t[key];
+    });
+    document.getElementById('currentLang').innerText = lang === 'hi' ? 'हिंदी' : 'English';
+  }
+
+  // Initialize Language
+  const savedLang = localStorage.getItem('winmore_lang') || 'en';
+  applyLanguage(savedLang);
 </script>
 
 </body>

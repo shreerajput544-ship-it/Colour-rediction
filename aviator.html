@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator - Win More</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #101010; color: #fff; padding-bottom: 20px; }
+        
+        /* Header */
+        .header { background: #202020; padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; }
+        .back-btn { cursor: pointer; font-size: 24px; color: #fff; text-decoration: none; }
+        .balance { font-weight: bold; color: #2ecc71; font-size: 18px; }
+        
+        /* Game Area */
+        .game-container {
+            margin: 15px;
+            background: #1a1a1a;
+            border-radius: 15px;
+            border: 1px solid #333;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        .multiplier-text {
+            position: absolute;
+            top: 40%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 56px;
+            font-weight: bold;
+            color: #fff;
+            z-index: 10;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        .plane {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 40px;
+            transition: bottom 0.1s linear, left 0.1s linear;
+            z-index: 5;
+        }
+
+        .trail-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        .trail-line {
+            fill: none;
+            stroke: #e74c3c;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px #e74c3c);
+        }
+        
+        .crash-msg {
+            position: absolute;
+            top: 60%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 20px;
+            display: none;
+        }
+
+        /* History Bar */
+        .history-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            background: #151515;
+            margin-bottom: 10px;
+        }
+        .history-pill {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #252525;
+            white-space: nowrap;
+        }
+        .h-win { color: #2ecc71; border: 1px solid #2ecc71; }
+        .h-lose { color: #e74c3c; border: 1px solid #e74c3c; }
+
+        /* Controls */
+        .controls {
+            padding: 20px;
+            background: #202020;
+            border-radius: 20px 20px 0 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .bet-input {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #111;
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .btn-bet { background: #2ecc71; box-shadow: 0 4px 0 #27ae60; }
+        .btn-bet:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-cashout { background: #f39c12; box-shadow: 0 4px 0 #d35400; }
+        .btn-cashout:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-wait { background: #555; cursor: not-allowed; color: #aaa; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="home.html" class="back-btn">←</a>
+        <span>Aviator</span>
+        <span class="balance">₹<span id="wallet">0.00</span></span>
+    </div>
+
+    <div class="history-bar" id="historyBar">
+        <!-- History items will appear here -->
+    </div>
+
+    <div class="game-container">
+        <svg class="trail-svg">
+            <path id="trailPath" class="trail-line" d=""></path>
+        </svg>
+        <div class="multiplier-text" id="multiplier">1.00x</div>
+        <div class="crash-msg" id="crashMsg">FLEW AWAY!</div>
+        <div class="plane" id="plane">✈️</div>
+        <div class="plane" id="plane" style="transform: rotate(-10deg);">✈️</div>
+    </div>
+
+    <div class="controls">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; color:#fff; font-size:14px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="autoCashOutCheck" style="width:18px; height:18px; accent-color:#2ecc71;"> 
+                <b>Auto Cash Out</b>
+            </label>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <input type="number" id="autoCashOutValue" value="2.00" step="0.10" style="width:70px; padding:8px; border-radius:8px; border:none; text-align:center; font-weight:bold; background:#333; color:#888;" disabled>
+                <span style="font-weight:bold;">x</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <button onclick="adjustBet(-10)" style="padding:10px; background:#333; border:none; color:#fff; border-radius:5px;">-</button>
+            <input type="number" id="betAmount" class="bet-input" value="10">
+            <button onclick="adjustBet(10)" style="padding:10px; background:#333; border:none; color:#fff; border-radius:5px;">+</button>
+        </div>
+        <button id="mainBtn" class="action-btn btn-bet" onclick="handleAction()">PLACE BET</button>
+    </div>
+
+    <!-- Crash Sound -->
+    <audio id="crashAudio" src="https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3"></audio>
+
+    <script>
+        let wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 1000;
+        document.getElementById('wallet').innerText = wallet.toFixed(2);
+
+        let gameState = "IDLE"; // IDLE, BETTING, FLYING, CRASHED
+        let multiplier = 1.00;
+        let crashPoint = 0;
+        let currentBet = 0;
+        let isBetPlaced = false;
+        let isCashedOut = false;
+        let gameInterval;
+        let pathStr = "";
+
+        // Auto Cash Out Toggle
+        document.getElementById('autoCashOutCheck').addEventListener('change', function() {
+            const input = document.getElementById('autoCashOutValue');
+            input.disabled = !this.checked;
+            if(this.checked) {
+                input.style.background = "#fff";
+                input.style.color = "#000";
+            } else {
+                input.style.background = "#333";
+                input.style.color = "#888";
+            }
+        });
+
+        function adjustBet(val) {
+            let el = document.getElementById('betAmount');
+            let amt = parseInt(el.value) || 0;
+            if(amt + val >= 10) el.value = amt + val;
+        }
+
+        function startGameLoop() {
+            // 1. Betting Phase (5 seconds)
+            gameState = "BETTING";
+            resetUI();
+            
+            let countdown = 5;
+            let cdInterval = setInterval(() => {
+                document.getElementById('multiplier').innerText = `Start in ${countdown}s`;
+                document.getElementById('multiplier').style.fontSize = "32px";
+                countdown--;
+                if(countdown < 0) {
+                    clearInterval(cdInterval);
+                    startFlying();
+                }
+            }, 1000);
+        }
+
+        function startFlying() {
+            gameState = "FLYING";
+            multiplier = 1.00;
+            // Random crash point (weighted towards lower numbers for realism)
+            crashPoint = (Math.random() < 0.4) ? (1.0 + Math.random()) : (1.0 + Math.random() * 5);
+            
+            document.getElementById('multiplier').style.fontSize = "56px";
+            document.getElementById('multiplier').style.color = "#fff";
+            
+            // Reset Trail
+            pathStr = "M 20 280"; // 300px height - 20px bottom
+            document.getElementById('trailPath').setAttribute('d', pathStr);
+
+            if(isBetPlaced) {
+                const btn = document.getElementById('mainBtn');
+                btn.className = "action-btn btn-cashout";
+                btn.innerText = "CASH OUT";
+                btn.disabled = false;
+            } else {
+                const btn = document.getElementById('mainBtn');
+                btn.className = "action-btn btn-wait";
+                btn.innerText = "WAITING...";
+                btn.disabled = true;
+            }
+
+            gameInterval = setInterval(() => {
+                multiplier += 0.01 + (multiplier * 0.002); // Exponential growth
+                document.getElementById('multiplier').innerText = multiplier.toFixed(2) + "x";
+                
+                // Move Plane
+                let progress = Math.min((multiplier - 1) / 3, 1); // Cap movement at 3x visually
+                document.getElementById('plane').style.bottom = (20 + progress * 200) + "px";
+                document.getElementById('plane').style.left = (20 + progress * 200) + "px";
+
+                // Update Trail
+                let x = 20 + progress * 200 + 20; 
+                let y = 300 - (20 + progress * 200 + 20);
+                pathStr += ` L ${x} ${y}`;
+                document.getElementById('trailPath').setAttribute('d', pathStr);
+
+                // Auto Cash Out Check
+                let autoTarget = parseFloat(document.getElementById('autoCashOutValue').value) || 2.00;
+                if(isBetPlaced && !isCashedOut && document.getElementById('autoCashOutCheck').checked && multiplier >= autoTarget) {
+                    performCashOut();
+                }
+
+                if(multiplier >= crashPoint) {
+                    crash();
+                }
+            }, 50);
+        }
+
+        function crash() {
+            clearInterval(gameInterval);
+            gameState = "CRASHED";
+            document.getElementById('multiplier').style.color = "#e74c3c";
+            document.getElementById('crashMsg').style.display = "block";
+            document.getElementById('crashAudio').play();
+            
+            // Add to history
+            const bar = document.getElementById('historyBar');
+            const pill = document.createElement('div');
+            pill.className = `history-pill ${crashPoint >= 2 ? 'h-win' : 'h-lose'}`;
+            pill.innerText = crashPoint.toFixed(2) + "x";
+            bar.prepend(pill);
+
+            if(isBetPlaced && !isCashedOut) {
+                // Loss
+                isBetPlaced = false;
+            }
+
+            setTimeout(startGameLoop, 3000);
+        }
+
+        function performCashOut() {
+            if(isBetPlaced && !isCashedOut) {
+                let winAmount = Math.floor(currentBet * multiplier);
+                wallet += winAmount;
+                localStorage.setItem('winmore_wallet', wallet);
+                document.getElementById('wallet').innerText = wallet.toFixed(2);
+                
+                isCashedOut = true;
+                const btn = document.getElementById('mainBtn');
+                btn.innerText = `WON ₹${winAmount}`;
+                btn.className = "action-btn btn-wait";
+                btn.disabled = true;
+            }
+        }
+
+        function handleAction() {
+            const btn = document.getElementById('mainBtn');
+            const amt = parseInt(document.getElementById('betAmount').value);
+
+            if(gameState === "BETTING") {
+                if(amt > wallet) return alert("Insufficient balance");
+                if(amt < 10) return alert("Min bet ₹10");
+                
+                wallet -= amt;
+                localStorage.setItem('winmore_wallet', wallet);
+                document.getElementById('wallet').innerText = wallet.toFixed(2);
+                
+                currentBet = amt;
+                isBetPlaced = true;
+                isCashedOut = false;
+                
+                btn.innerText = "BET PLACED";
+                btn.className = "action-btn btn-wait";
+                btn.disabled = true;
+            } 
+            else if(gameState === "FLYING") {
+                if(isBetPlaced && !isCashedOut) {
+                    performCashOut();
+                }
+            }
+        }
+
+        function resetUI() {
+            document.getElementById('plane').style.bottom = "20px";
+            document.getElementById('plane').style.left = "20px";
+            document.getElementById('crashMsg').style.display = "none";
+            document.getElementById('multiplier').style.color = "#fff";
+            document.getElementById('trailPath').setAttribute('d', "");
+            
+            const btn = document.getElementById('mainBtn');
+            btn.className = "action-btn btn-bet";
+            btn.innerText = "PLACE BET";
+            btn.disabled = false;
+            
+            isBetPlaced = false;
+            isCashedOut = false;
+        }
+
+        // Start the first loop
+        startGameLoop();
+    </script>
+</body>
+</html>

@@ -181,6 +181,115 @@ body{
 }
 .nav-item span:first-child { font-size: 22px; margin-bottom: 2px; }
 .nav-item.active { color: #ff6a6a; font-weight: bold; }
+
+/* SPINNER POPUP */
+.popup {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, .6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+.wheel-popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 350px;
+    position: relative;
+}
+.wheel-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 20px auto;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        #e74c3c 0deg 60deg,
+        #3498db 60deg 120deg,
+        #2ecc71 120deg 180deg,
+        #95a5a6 180deg 240deg,
+        #9b59b6 240deg 300deg,
+        #f39c12 300deg 360deg
+    );
+    transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+    position: relative;
+}
+.stopper {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #333;
+    z-index: 10;
+}
+.spin-btn-action {
+    background: linear-gradient(45deg, #ff6a6a, #ff8c8c);
+    color: #fff;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+}
+.spin-btn-action:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* MYSTERY BOX */
+.mystery-box-anim {
+    font-size: 80px;
+    animation: shake 0.5s infinite;
+    cursor: pointer;
+    user-select: none;
+}
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* LUCKY DRAW */
+.ticket-container {
+    background: linear-gradient(45deg, #ff9a9a, #ff6a6a);
+    padding: 20px;
+    border-radius: 15px;
+    color: #fff;
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+}
+.ticket-price { font-size: 24px; font-weight: bold; margin: 5px 0; }
+.ticket-btn {
+    background: #fff;
+    color: #ff6a6a;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
 </style>
 </head>
 
@@ -220,15 +329,15 @@ body{
   <div class="small-cards">
     <div class="small-card" onclick="goToWingo()">⚡ Win 30</div>
     <div class="small-card" onclick="window.location.href='winone.html'">⏱ Win 1 Min</div>
-    <div class="small-card" onclick="goToWingo()">🏆 Leaderboard</div>
+    <div class="small-card" onclick="window.location.href='aviator.html'">✈️ Aviator</div>
   </div>
 
   <!-- Pair Cards -->
   <div class="pair-cards">
-    <div class="pair-card">Daily Spin</div>
-    <div class="pair-card">Weekly Prize</div>
-    <div class="pair-card">Mystery Box</div>
-    <div class="pair-card">Lucky Draw</div>
+    <div class="pair-card" onclick="openSpinPopup()">Daily Spin</div>
+    <div class="pair-card" onclick="openWeeklyPopup()">Weekly Prize</div>
+    <div class="pair-card" onclick="openMysteryBox()">Mystery Box</div>
+    <div class="pair-card" onclick="openLuckyDraw()">Lucky Draw</div>
     <div class="pair-card">Bonus Hunt</div>
     <div class="pair-card">Top Winner</div>
   </div>
@@ -255,6 +364,66 @@ body{
   </div>
 </div>
 
+<!-- DAILY SPIN POPUP -->
+<div class="popup" id="spinPopup">
+    <div class="wheel-popup-content">
+        <h3>Daily Spin</h3>
+        <div class="wheel-container">
+            <div class="stopper"></div>
+            <div class="wheel" id="theWheel">
+                <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%) rotate(30deg); transform-origin:0 105px; color:white; font-weight:bold; text-shadow:1px 1px 0 #000;">₹10</div>
+                <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%) rotate(90deg); transform-origin:0 105px; color:white; font-weight:bold; text-shadow:1px 1px 0 #000;">₹50</div>
+                <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%) rotate(150deg); transform-origin:0 105px; color:white; font-weight:bold; text-shadow:1px 1px 0 #000;">₹100</div>
+                <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%) rotate(210deg); transform-origin:0 105px; color:white; font-weight:bold; text-shadow:1px 1px 0 #000;">0</div>
+                <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%) rotate(270deg); transform-origin:0 105px; color:white; font-weight:bold; text-shadow:1px 1px 0 #000;">₹20</div>
+                <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%) rotate(330deg); transform-origin:0 105px; color:white; font-weight:bold; text-shadow:1px 1px 0 #000;">₹500</div>
+            </div>
+        </div>
+        <p id="spinResultText" style="font-weight:bold; margin-top:10px;">Spin to win!</p>
+        <button class="spin-btn-action" id="spinBtn" onclick="startSpin()">SPIN</button>
+        <button onclick="document.getElementById('spinPopup').style.display='none'" style="margin-top:10px; background:transparent; border:none; color:#999; text-decoration:underline; cursor:pointer">Close</button>
+    </div>
+</div>
+
+<!-- WEEKLY PRIZE POPUP -->
+<div class="popup" id="weeklyPopup">
+    <div class="wheel-popup-content">
+        <h3>Weekly Prize Draw</h3>
+        <p style="color:#888; margin-top:5px;">Next draw in:</p>
+        <div id="weeklyTimer" style="font-size: 28px; font-weight: bold; margin: 15px 0; color: #ff6a6a; font-family: monospace;">
+            00d 00h 00m 00s
+        </div>
+        <p>🏆 Prize Pool: <span style="color:#2ecc71; font-weight:bold;">₹10,00,000</span></p>
+        <p style="font-size:12px; color:#999; margin-top:10px;">Participate by placing bets this week!</p>
+        <button onclick="document.getElementById('weeklyPopup').style.display='none'" style="margin-top:15px; background:transparent; border:none; color:#555; text-decoration:underline; cursor:pointer">Close</button>
+    </div>
+</div>
+
+<!-- MYSTERY BOX POPUP -->
+<div class="popup" id="mysteryPopup">
+    <div class="wheel-popup-content">
+        <h3>Mystery Box</h3>
+        <div style="margin: 30px 0;" id="mysteryIcon" class="mystery-box-anim" onclick="revealMystery()">🎁</div>
+        <p id="mysteryText">Tap the box to open!</p>
+        <button onclick="document.getElementById('mysteryPopup').style.display='none'" style="margin-top:15px; background:transparent; border:none; color:#555; text-decoration:underline; cursor:pointer">Close</button>
+    </div>
+</div>
+
+<!-- LUCKY DRAW POPUP -->
+<div class="popup" id="luckyDrawPopup">
+    <div class="wheel-popup-content">
+        <h3>Lucky Draw</h3>
+        <p style="color:#888; font-size:12px; margin-bottom:15px;">Buy a ticket for a chance to win up to ₹1000!</p>
+        <div class="ticket-container">
+            <div>Golden Ticket</div>
+            <div class="ticket-price">₹50</div>
+            <button class="ticket-btn" id="buyTicketBtn" onclick="buyLuckyTicket()">Buy Now</button>
+        </div>
+        <p id="luckyResult" style="font-weight:bold; min-height:20px;"></p>
+        <button onclick="document.getElementById('luckyDrawPopup').style.display='none'" style="margin-top:10px; background:transparent; border:none; color:#999; text-decoration:underline; cursor:pointer">Close</button>
+    </div>
+</div>
+
 <script>
 if(!localStorage.getItem("user")){
   window.location.href="index.html";
@@ -268,6 +437,193 @@ function logout(){
 /* ✅ NEW FUNCTION */
 function goToWingo(){
   window.location.href = "wingoone.html";
+}
+
+/* DAILY SPIN LOGIC */
+function openSpinPopup() {
+    document.getElementById('spinPopup').style.display = 'flex';
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = false;
+    btn.innerText = "SPIN";
+    document.getElementById('spinResultText').innerText = "Spin to win!";
+    document.getElementById('theWheel').style.transform = 'rotate(0deg)';
+}
+
+function startSpin() {
+    const btn = document.getElementById('spinBtn');
+    if(btn.disabled) return;
+    btn.disabled = true;
+    
+    // Prizes: 0-60:10, 60-120:50, 120-180:100, 180-240:0, 240-300:20, 300-360:500
+    const prizes = [
+        { label: '₹10', val: 10 },
+        { label: '₹50', val: 50 },
+        { label: '₹100', val: 100 },
+        { label: '0', val: 0 }, // Index 3
+        { label: '₹20', val: 20 },
+        { label: '₹500', val: 500 }
+    ];
+    
+    // FORCE RESULT TO BE 0 (Index 3)
+    const prizeIndex = 3; 
+    const prize = prizes[prizeIndex];
+    
+    // Calculate rotation: Target center of segment to align with top (0deg)
+    const segmentCenter = (prizeIndex * 60) + 30;
+    const targetRotation = 360 - segmentCenter; 
+    const finalDeg = (5 * 360) + targetRotation; // 5 spins
+    
+    document.getElementById('theWheel').style.transform = `rotate(${finalDeg}deg)`;
+    
+    setTimeout(() => {
+        document.getElementById('spinResultText').innerText = `Result: ${prize.label}`;
+        btn.innerText = "Try Again";
+        btn.disabled = false;
+        logTransaction(Date.now(), "Daily Spin", prize.val, "Success", "Daily Spin Result");
+    }, 4000);
+}
+
+/* WEEKLY PRIZE LOGIC */
+let weeklyInterval;
+function openWeeklyPopup() {
+    document.getElementById('weeklyPopup').style.display = 'flex';
+    startWeeklyTimer();
+}
+
+function startWeeklyTimer() {
+    if(weeklyInterval) clearInterval(weeklyInterval);
+    
+    function update() {
+        const now = new Date();
+        const currentDay = now.getDay(); // 0=Sun, 1=Mon...
+        
+        // Target: Next Sunday 23:59:59
+        const target = new Date(now);
+        target.setDate(now.getDate() + ((7 - currentDay) % 7));
+        target.setHours(23, 59, 59, 999);
+        if (target < now) target.setDate(target.getDate() + 7);
+
+        const distance = target - now;
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById("weeklyTimer").innerText = `${d}d ${h}h ${m}m ${s}s`;
+    }
+    update();
+    weeklyInterval = setInterval(update, 1000);
+}
+
+/* MYSTERY BOX LOGIC */
+function openMysteryBox() {
+    const lastClaim = localStorage.getItem('winmore_mystery_date');
+    const today = new Date().toDateString();
+    
+    document.getElementById('mysteryPopup').style.display = 'flex';
+    const icon = document.getElementById('mysteryIcon');
+    const txt = document.getElementById('mysteryText');
+    
+    if (lastClaim === today) {
+        icon.style.animation = 'none';
+        icon.innerText = '📦';
+        icon.onclick = null;
+        txt.innerText = "Come back tomorrow for more!";
+    } else {
+        icon.style.animation = 'shake 0.5s infinite';
+        icon.innerText = '🎁';
+        icon.onclick = revealMystery;
+        txt.innerText = "Tap the box to open!";
+    }
+}
+
+function revealMystery() {
+    const icon = document.getElementById('mysteryIcon');
+    const txt = document.getElementById('mysteryText');
+    
+    icon.style.animation = 'none';
+    
+    // Random reward ₹1 - ₹10
+    const reward = Math.floor(Math.random() * 10) + 1;
+    
+    icon.innerText = '💰';
+    txt.innerText = `You found ₹${reward}!`;
+    
+    // Update Wallet
+    let wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 0;
+    wallet += reward;
+    localStorage.setItem('winmore_wallet', wallet);
+    localStorage.setItem('winmore_mystery_date', new Date().toDateString());
+    
+    logTransaction(Date.now(), "Mystery Bonus", reward, "Success", "Mystery Box Reward");
+    
+    icon.onclick = null;
+}
+
+/* LUCKY DRAW LOGIC */
+function openLuckyDraw() {
+    document.getElementById('luckyDrawPopup').style.display = 'flex';
+    document.getElementById('luckyResult').innerText = "";
+    document.getElementById('buyTicketBtn').disabled = false;
+    document.getElementById('buyTicketBtn').innerText = "Buy Now";
+}
+
+function buyLuckyTicket() {
+    let wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 0;
+    const cost = 50;
+    
+    if (wallet < cost) {
+        alert("Insufficient balance!");
+        return;
+    }
+    
+    // Deduct cost
+    wallet -= cost;
+    localStorage.setItem('winmore_wallet', wallet);
+    logTransaction(Date.now(), "Lucky Draw", -cost, "Success", "Ticket Purchase");
+    
+    const btn = document.getElementById('buyTicketBtn');
+    btn.disabled = true;
+    btn.innerText = "Scratching...";
+    
+    setTimeout(() => {
+        // Determine Prize
+        const rand = Math.random() * 100;
+        let prize = 0;
+        
+        if (rand < 50) prize = 0;          // 50% Lose
+        else if (rand < 80) prize = 20;    // 30% ₹20
+        else if (rand < 90) prize = 50;    // 10% ₹50
+        else if (rand < 95) prize = 100;   // 5% ₹100
+        else if (rand < 99) prize = 200;   // 4% ₹200
+        else prize = 1000;                 // 1% ₹1000
+        
+        const resTxt = document.getElementById('luckyResult');
+        
+        if (prize > 0) {
+            wallet += prize;
+            localStorage.setItem('winmore_wallet', wallet);
+            logTransaction(Date.now(), "Lucky Draw Win", prize, "Success", "Ticket Win");
+            resTxt.innerText = `🎉 You won ₹${prize}!`;
+            resTxt.style.color = "#2ecc71";
+        } else {
+            resTxt.innerText = "Better luck next time!";
+            resTxt.style.color = "#e74c3c";
+        }
+        
+        btn.disabled = false;
+        btn.innerText = "Buy Again";
+        
+    }, 1500);
+}
+
+/* TRANSACTION LOGGER */
+function logTransaction(id, type, amount, status, desc) {
+    let txs = JSON.parse(localStorage.getItem('winmore_transactions') || '[]');
+    txs.unshift({
+        id: id, type: type, amount: amount, status: status, desc: desc, date: new Date().toLocaleString()
+    });
+    localStorage.setItem('winmore_transactions', JSON.stringify(txs));
 }
 </script>
 
