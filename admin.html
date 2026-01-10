@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { margin-bottom: 20px; color: #333; }
+        h2 { margin-bottom: 15px; color: #555; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        /* Table styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f9f9f9; color: #666; }
+        
+        /* Buttons */
+        .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-weight: bold; font-size: 12px; margin-right: 5px; }
+        .btn-approve { background: #2ecc71; }
+        .btn-reject { background: #e74c3c; }
+        .btn-set { background: #3498db; padding: 10px 20px; font-size: 14px; }
+        
+        select { padding: 10px; font-size: 14px; border-radius: 5px; border: 1px solid #ddd; margin-right: 10px; width: 200px; }
+        .status-msg { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+
+    <!-- Live Status Section -->
+    <div class="card">
+        <h2>Live Game Status</h2>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:200px; background:#f9f9f9; padding:15px; border-radius:8px;">
+                <h3 style="margin-bottom:10px; color:#ff6a6a;">Win 1 Min</h3>
+                <p>Period: <b id="p1m" style="font-size:18px;">Loading...</b></p>
+                <p>Time: <b id="t1m">--</b>s</p>
+                <p style="font-size:13px; margin-top:5px;">Result: <b id="res1m">--</b></p>
+                <div id="stats1m" style="margin-top:10px; font-size:14px;">
+                    <!-- Stats injected via JS -->
+                </div>
+            </div>
+            <div style="flex:1; min-width:200px; background:#f9f9f9; padding:15px; border-radius:8px;">
+                <h3 style="margin-bottom:10px; color:#ff6a6a;">Win 30 Sec</h3>
+                <p>Period: <b id="p30s" style="font-size:18px;">Loading...</b></p>
+                <p>Time: <b id="t30s">--</b>s</p>
+                <p style="font-size:13px; margin-top:5px;">Result: <b id="res30s">--</b></p>
+                <div id="stats30s" style="margin-top:10px; font-size:14px;">
+                    <!-- Stats injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Result Section -->
+    <div class="card">
+        <h2>Declare Game Result</h2>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; font-size:13px; color:#666; margin-bottom:5px;">Target Period</label>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button class="btn" style="background:#555; flex:1;" onclick="fillPeriod('1m')">Current 1 Min</button>
+                <button class="btn" style="background:#555; flex:1;" onclick="fillPeriod('30s')">Current 30 Sec</button>
+            </div>
+            <input type="text" id="periodInput" placeholder="Enter Period No." style="padding:10px; width:100%; border:1px solid #ddd; border-radius:5px; box-sizing: border-box;">
+        </div>
+
+        <p style="margin-bottom:10px; color:#666; font-size:13px;">Select Result Number:</p>
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; margin-bottom:15px;">
+            <button onclick="setResult(0)" style="background:#9b59b6; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">0</button>
+            <button onclick="setResult(1)" style="background:#2ecc71; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">1</button>
+            <button onclick="setResult(2)" style="background:#e74c3c; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">2</button>
+            <button onclick="setResult(3)" style="background:#2ecc71; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">3</button>
+            <button onclick="setResult(4)" style="background:#e74c3c; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">4</button>
+            <button onclick="setResult(5)" style="background:#9b59b6; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">5</button>
+            <button onclick="setResult(6)" style="background:#e74c3c; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">6</button>
+            <button onclick="setResult(7)" style="background:#2ecc71; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">7</button>
+            <button onclick="setResult(8)" style="background:#e74c3c; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">8</button>
+            <button onclick="setResult(9)" style="background:#2ecc71; color:#fff; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">9</button>
+        </div>
+        
+        <p id="resultStatus" class="status-msg" style="color: green; min-height:20px;"></p>
+    </div>
+
+    <!-- Payment Verification Section -->
+    <div class="card">
+        <h2>Pending Deposit Requests</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Details</th>
+                    <th>Amount</th>
+                    <th>UTR No.</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="depositList">
+                <!-- Rows will be added here via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // --- 1. Handle Game Result ---
+        // Load current period if available in storage
+        const currentPeriod = localStorage.getItem('winmore_game_period');
+        if(currentPeriod) {
+            document.getElementById('periodInput').value = currentPeriod;
+        }
+
+        function fillPeriod(type) {
+            if(type === '1m') document.getElementById('periodInput').value = document.getElementById('p1m').innerText;
+            if(type === '30s') document.getElementById('periodInput').value = document.getElementById('p30s').innerText;
+        }
+
+        function setResult(num) {
+            const period = document.getElementById('periodInput').value;
+
+            if(!period || period === 'Loading...') {
+                alert("Please enter or select a valid Period Number");
+                return;
+            }
+
+            let color = '';
+            let size = num >= 5 ? 'Big' : 'Small';
+            
+            if(num === 0 || num === 5) color = 'Violet';
+            else if(num % 2 === 0) color = 'Red';
+            else color = 'Green';
+
+            const resultData = { period, color, size };
+            localStorage.setItem('winmore_admin_result', JSON.stringify(resultData));
+            
+            document.getElementById('resultStatus').innerText = `Success! Result set for ${period}: ${num} (${color}/${size})`;
+            setTimeout(() => document.getElementById('resultStatus').innerText = '', 3000);
+        }
+
+        // --- 2. Handle Deposits ---
+        function loadDeposits() {
+            const list = document.getElementById('depositList');
+            list.innerHTML = '';
+            
+            const txs = JSON.parse(localStorage.getItem('winmore_transactions') || '[]');
+            // Filter for Pending Deposits
+            const pending = txs.filter(t => t.type === 'Deposit' && t.status === 'Pending');
+
+            if(pending.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">No pending requests</td></tr>';
+                return;
+            }
+
+            pending.forEach(tx => {
+                // Extract UTR from description if possible
+                const utrMatch = tx.desc.match(/UTR:(\w+)/);
+                const utr = utrMatch ? utrMatch[1] : 'N/A';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tx.desc.split(' UTR')[0]}</td>
+                    <td style="color:#2ecc71; font-weight:bold;">₹${tx.amount}</td>
+                    <td>${utr}</td>
+                    <td>${tx.date}</td>
+                    <td>
+                        <button class="btn btn-approve" onclick="processDeposit(${tx.id}, 'approve')">Approve</button>
+                        <button class="btn btn-reject" onclick="processDeposit(${tx.id}, 'reject')">Reject</button>
+                    </td>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function processDeposit(id, action) {
+            let txs = JSON.parse(localStorage.getItem('winmore_transactions') || '[]');
+            const index = txs.findIndex(t => t.id === id);
+            
+            if(index > -1) {
+                if(action === 'approve') {
+                    // Update Status
+                    txs[index].status = 'Success';
+                    // Add Money to Wallet
+                    let wallet = parseFloat(localStorage.getItem('winmore_wallet')) || 0;
+                    wallet += parseFloat(txs[index].amount);
+                    localStorage.setItem('winmore_wallet', wallet);
+                    alert('Deposit Approved! Wallet updated.');
+                } else {
+                    // Reject
+                    txs[index].status = 'Failed';
+                    alert('Deposit Rejected.');
+                }
+                
+                // Save Transactions
+                localStorage.setItem('winmore_transactions', JSON.stringify(txs));
+                // Refresh List
+                loadDeposits();
+            }
+        }
+
+        // Initial Load
+        loadDeposits();
+
+        // --- 3. Live Status Logic ---
+        function updateLiveStatus() {
+            const now = Math.floor(Date.now() / 1000);
+            const history = JSON.parse(localStorage.getItem('winmore_game_history') || '[]');
+            
+            // 1 Min
+            const info1m = getPeriodInfoFromTimestamp(now, 60);
+            document.getElementById('p1m').innerText = info1m.periodId;
+            document.getElementById('t1m').innerText = info1m.remaining;
+            updateResultDisplay('res1m', info1m.periodId, info1m.remaining, 't1m');
+            renderStats('stats1m', history, info1m.periodId, 'Win 1 Min');
+
+            // 30 Sec
+            const info30s = getPeriodInfoFromTimestamp(now, 30);
+            document.getElementById('p30s').innerText = info30s.periodId;
+            document.getElementById('t30s').innerText = info30s.remaining;
+            updateResultDisplay('res30s', info30s.periodId, info30s.remaining, 't30s');
+            renderStats('stats30s', history, info30s.periodId, 'Win 30');
+        }
+
+        function renderStats(containerId, history, currentPeriod, gameType) {
+            const stats = {
+                Big: 0, Small: 0,
+                Red: 0, Green: 0, Violet: 0,
+                0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0
+            };
+
+            history.forEach(bet => {
+                if(String(bet.period) === String(currentPeriod) && bet.game === gameType && bet.status === 'Pending') {
+                    const sel = bet.selection;
+                    const amt = Math.abs(bet.amount);
+                    if(stats[sel] !== undefined) {
+                        stats[sel] += amt;
+                    }
+                }
+            });
+            
+            let html = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span>Big: <b style="color:#ffa502">₹${stats.Big}</b></span>
+                    <span>Small: <b style="color:#1e90ff">₹${stats.Small}</b></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span>R: <b style="color:#e74c3c">₹${stats.Red}</b></span>
+                    <span>G: <b style="color:#2ecc71">₹${stats.Green}</b></span>
+                    <span>V: <b style="color:#9b59b6">₹${stats.Violet}</b></span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; text-align:center; font-size:11px;">
+            `;
+            
+            for(let i=0; i<=9; i++) {
+                html += `<span>${i}: <b>${stats[i]}</b></span>`;
+            }
+            html += `</div>`;
+
+            document.getElementById(containerId).innerHTML = html;
+        }
+
+        function updateResultDisplay(elementId, pid, remaining, timeId) {
+            const el = document.getElementById(elementId);
+            const timeEl = document.getElementById(timeId);
+            
+            // Highlight last 10 seconds
+            if(remaining <= 10) {
+                timeEl.style.color = 'red';
+                timeEl.style.fontWeight = 'bold';
+                timeEl.innerText = remaining + "s (Set Now!)";
+            } else {
+                timeEl.style.color = 'black';
+                timeEl.style.fontWeight = 'normal';
+                timeEl.innerText = remaining + "s";
+            }
+
+            // Check for Admin Set Result
+            const adminData = localStorage.getItem('winmore_admin_result');
+            let adminSet = false;
+            if (adminData) {
+                const res = JSON.parse(adminData);
+                if (String(res.period).trim() === String(pid).trim()) {
+                    el.innerHTML = `<span style="color:blue">Set: ${res.color} (${res.size})</span>`;
+                    adminSet = true;
+                }
+            }
+
+            // If not set, show Default Random
+            if (!adminSet) {
+                let hash = 0;
+                for (let i = 0; i < pid.length; i++) { hash = (hash << 5) - hash + pid.charCodeAt(i); hash |= 0; }
+                const defNum = Math.abs(hash) % 10;
+                el.innerHTML = `<span style="color:gray">Default: ${defNum} (Random)</span>`;
+            }
+        }
+
+        function getPeriodInfoFromTimestamp(totalSeconds, interval) {
+            const dateObj = new Date(totalSeconds * 1000);
+            const startOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime() / 1000;
+            const secondsSinceStart = totalSeconds - startOfDay;
+            const periodSeq = Math.floor(secondsSinceStart / interval) + 1;
+            
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const periodId = `${y}${m}${d}${String(periodSeq).padStart(4, '0')}`;
+            
+            const remaining = interval - (secondsSinceStart % interval);
+            return { periodId, remaining };
+        }
+
+        setInterval(updateLiveStatus, 1000);
+        updateLiveStatus();
+    </script>
+</body>
+</html>

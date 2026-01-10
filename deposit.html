@@ -108,24 +108,8 @@
         return;
       }
 
-      // Simulate processing
-      const btn = document.querySelector('.deposit-btn');
-      btn.innerText = 'Processing...';
-      btn.disabled = true;
-
-      setTimeout(() => {
-        // Update Wallet
-        const newBalance = wallet + amt;
-        localStorage.setItem('winmore_wallet', newBalance);
-
-        // Log Transaction
-        let txs = JSON.parse(localStorage.getItem('winmore_transactions') || '[]');
-        txs.unshift({ id: Date.now(), type: "Deposit", amount: amt, status: "Success", desc: `${selectedMethodName} Deposit`, date: new Date().toLocaleString() });
-        localStorage.setItem('winmore_transactions', JSON.stringify(txs));
-
-        alert('Deposit Successful!');
-        window.history.back();
-      }, 1500);
+      // Redirect to Payment QR Page
+      window.location.href = `payment_qr.html?amount=${amt}&method=${selectedMethodName}`;
     }
   </script>
 </body>
